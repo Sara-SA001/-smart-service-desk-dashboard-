@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const api = axios.create({
-  baseURL: "http://62.171.153.198:18473",
+  baseURL: "/api",
   timeout: 60000,
 });
 
