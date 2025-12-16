@@ -1,3 +1,4 @@
+// src/app/dashboard/tickets/[id]/page.tsx
 "use client";
 
 import { use, useEffect, useState } from "react";
@@ -48,7 +49,6 @@ export default function TicketDetailPage({
   const { user: currentUser } = useAuthStore();
   const updateTicket = useUpdateTicket();
 
-  /* ================== جلب التذكرة ================== */
   const { data: ticket, isLoading } = useQuery<Ticket>({
     queryKey: ["ticket", id],
     queryFn: async () => {
@@ -57,7 +57,6 @@ export default function TicketDetailPage({
     },
   });
 
-  /* ================== Edit Mode ================== */
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({
     title: "",
@@ -73,7 +72,6 @@ export default function TicketDetailPage({
     }
   }, [ticket]);
 
-  /* ================== التعليقات ================== */
   const { data: comments = [], isLoading: commentsLoading } =
     useTicketComments(id);
   const addComment = useAddComment();
@@ -89,27 +87,26 @@ export default function TicketDetailPage({
     );
   };
 
-  /* ================== تغيير الحالة ================== */
   const updateStatus = (status: Ticket["status"]) => {
     updateTicket.mutate({ id, data: { status } });
   };
 
-  /* ================== Loading / Error ================== */
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   if (!ticket) {
     return (
-      <div className="text-center py-20 text-red-600">التذكرة غير موجودة</div>
+      <div className="text-center py-20 text-red-600 text-2xl">
+        التذكرة غير موجودة
+      </div>
     );
   }
 
-  /* ================== Helpers ================== */
   const attachments = ticket.attachments ?? [];
 
   const priorityMap = { high: "عالية", medium: "متوسطة", low: "منخفضة" };
@@ -130,32 +127,36 @@ export default function TicketDetailPage({
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 p-6 pt-20">
-      {/* ================== Header ================== */}
-      <div className="flex justify-between items-center gap-4">
+    <div className="max-w-6xl mx-auto space-y-12 p-6 pt-24">
+      {/* Header */}
+      <div className="flex justify-between items-start gap-8">
         <Link href="/dashboard/tickets">
-          <Button variant="ghost">
-            <ArrowLeft className="ml-2 h-4 w-4" />
-            رجوع
+          <Button variant="ghost" size="lg" className="hover:bg-indigo-50">
+            <ArrowLeft className="ml-3 h-6 w-6" />
+            رجوع إلى التذاكر
           </Button>
         </Link>
 
-        {editMode ? (
-          <input
-            className="text-3xl font-bold border-b outline-none w-full"
-            value={editData.title}
-            onChange={(e) =>
-              setEditData({ ...editData, title: e.target.value })
-            }
-          />
-        ) : (
-          <h1 className="text-3xl font-bold">{ticket.title}</h1>
-        )}
+        <div className="flex-1 text-center">
+          {editMode ? (
+            <input
+              className="text-4xl font-bold text-center w-full bg-transparent border-b-4 border-indigo-500 outline-none"
+              value={editData.title}
+              onChange={(e) =>
+                setEditData({ ...editData, title: e.target.value })
+              }
+            />
+          ) : (
+            <h1 className="text-4xl font-bold text-gray-900">{ticket.title}</h1>
+          )}
+        </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           {editMode ? (
             <>
               <Button
+                size="lg"
+                className="bg-green-600 hover:bg-green-700"
                 onClick={() =>
                   updateTicket.mutate(
                     { id, data: editData },
@@ -163,10 +164,11 @@ export default function TicketDetailPage({
                   )
                 }
               >
-                حفظ
+                حفظ التغييرات
               </Button>
               <Button
                 variant="outline"
+                size="lg"
                 onClick={() => {
                   setEditMode(false);
                   setEditData({
@@ -179,67 +181,113 @@ export default function TicketDetailPage({
               </Button>
             </>
           ) : (
-            <Button variant="outline" onClick={() => setEditMode(true)}>
-              تعديل
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setEditMode(true)}
+            >
+              تعديل التذكرة
             </Button>
           )}
         </div>
       </div>
 
-      {/* ================== Card ================== */}
-      <Card>
-        <CardHeader className="flex justify-between gap-4">
-          <div className="flex gap-6 text-sm text-gray-600">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {new Date(ticket.createdAt).toLocaleDateString("en-ua")}
-            </span>
-            <span className="flex items-center gap-1">
-              <User className="h-4 w-4" />
-              {ticket.user?.name || currentUser?.name}
-            </span>
-          </div>
+      {/* Main Card */}
+      <Card className="shadow-2xl bg-white/95 backdrop-blur-sm rounded-2xl">
+        <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-t-2xl">
+          <div className="flex justify-between items-center flex-wrap gap-6">
+            <div className="flex flex-wrap gap-8 text-lg text-gray-700">
+              <span className="flex items-center gap-3">
+                <Calendar className="h-6 w-6 text-indigo-600" />
+                {new Date(ticket.createdAt).toLocaleDateString("ar-EG", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+              <span className="flex items-center gap-3">
+                <User className="h-6 w-6 text-indigo-600" />
+                {ticket.user?.name || currentUser?.name || "مستخدم"}
+              </span>
+            </div>
 
-          <div className="flex gap-2">
-            <Badge className={priorityColorMap[ticket.priority]}>
-              {priorityMap[ticket.priority]}
-            </Badge>
-            <Badge className={statusColorMap[ticket.status]}>
-              {statusMap[ticket.status]}
-            </Badge>
+            <div className="flex gap-4">
+              <Badge
+                className={`${
+                  priorityColorMap[ticket.priority]
+                } text-lg px-6 py-3 rounded-full`}
+              >
+                {priorityMap[ticket.priority]}
+              </Badge>
+              <Badge
+                className={`${
+                  statusColorMap[ticket.status]
+                } text-lg px-6 py-3 rounded-full`}
+              >
+                {statusMap[ticket.status]}
+              </Badge>
+            </div>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-8">
+        <CardContent className="p-10 space-y-12">
           {/* الوصف */}
-          <div>
-            <h3 className="font-semibold mb-2">الوصف</h3>
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-gray-900">الوصف</h3>
             {editMode ? (
               <Textarea
                 value={editData.description}
                 onChange={(e) =>
                   setEditData({ ...editData, description: e.target.value })
                 }
-                className="min-h-32"
+                className="min-h-48 text-lg border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
               />
             ) : (
-              <p className="whitespace-pre-wrap">{ticket.description}</p>
+              <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 p-6 rounded-xl">
+                {ticket.description}
+              </p>
             )}
           </div>
 
-          <Separator />
+          <Separator className="my-8" />
 
           {/* تغيير الحالة */}
-          <div className="flex gap-4 items-center">
-            <span className="font-semibold">الحالة:</span>
+          <div className="flex items-center gap-6">
+            <span className="text-xl font-semibold text-gray-800">
+              حالة التذكرة:
+            </span>
             <Select value={ticket.status} onValueChange={updateStatus}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-64 h-14 text-xl bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-xl shadow-md hover:shadow-xl hover:border-indigo-500 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-200 transition-all duration-300">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">معلقة</SelectItem>
-                <SelectItem value="in-progress">قيد المعالجة</SelectItem>
-                <SelectItem value="resolved">تم الحل</SelectItem>
+              <SelectContent className="bg-white border-2 border-indigo-200 shadow-2xl rounded-xl">
+                <SelectItem
+                  value="pending"
+                  className="py-4 hover:bg-indigo-100 relative pl-10"
+                >
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-600 opacity-0 select-item-check text-xl">
+                    ✓
+                  </span>
+                  معلقة
+                </SelectItem>
+                <SelectItem
+                  value="in-progress"
+                  className="py-4 hover:bg-indigo-100 relative pl-10"
+                >
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-600 opacity-0 select-item-check text-xl">
+                    ✓
+                  </span>
+                  قيد المعالجة
+                </SelectItem>
+                <SelectItem
+                  value="resolved"
+                  className="py-4 hover:bg-indigo-100 relative pl-10"
+                >
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-600 opacity-0 select-item-check text-xl">
+                    ✓
+                  </span>
+                  تم الحل
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -247,24 +295,26 @@ export default function TicketDetailPage({
           {/* المرفقات */}
           {attachments.length > 0 && (
             <>
-              <Separator />
+              <Separator className="my-8" />
               <div>
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Paperclip className="h-5 w-5" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-4">
+                  <Paperclip className="h-8 w-8 text-indigo-600" />
                   المرفقات ({attachments.length})
                 </h3>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {attachments.map((file, i) => (
                     <a
                       key={i}
                       href={file.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="border p-4 rounded-lg text-center hover:bg-gray-50"
+                      className="group block p-6 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-gray-50 to-gray-100"
                     >
-                      <Paperclip className="mx-auto mb-2 text-gray-500" />
-                      <p className="text-xs truncate">{file.originalName}</p>
+                      <Paperclip className="mx-auto mb-4 h-12 w-12 text-indigo-600 group-hover:scale-110 transition-transform" />
+                      <p className="text-center text-sm text-gray-700 truncate group-hover:text-indigo-700">
+                        {file.originalName}
+                      </p>
                     </a>
                   ))}
                 </div>
@@ -273,35 +323,66 @@ export default function TicketDetailPage({
           )}
 
           {/* التعليقات */}
-          <Separator />
-          <h3 className="font-semibold">التعليقات ({comments.length})</h3>
+          <Separator className="my-12" />
+          <div className="space-y-8">
+            <h3 className="text-2xl font-bold text-gray-900">
+              التعليقات ({comments.length})
+            </h3>
 
-          <form onSubmit={handleAddComment} className="flex gap-3">
-            <Textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="اكتب تعليق..."
-              required
-            />
-            <Button type="submit">إرسال</Button>
-          </form>
+            <form onSubmit={handleAddComment} className="flex gap-4">
+              <Textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="اكتب تعليقك هنا..."
+                className="flex-1 min-h-32 text-lg rounded-xl border-2 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                required
+              />
+              <Button
+                type="submit"
+                size="lg"
+                className="h-full px-10 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-xl"
+              >
+                إرسال
+              </Button>
+            </form>
 
-          <div className="space-y-6">
-            {commentsLoading ? (
-              <p className="text-center text-gray-500">جاري التحميل...</p>
-            ) : (
-              comments.map((c: any) => (
-                <div key={c._id} className="flex gap-4">
-                  <Avatar>
-                    <AvatarFallback>{(c.user?.name || "U")[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="bg-gray-50 p-4 rounded-lg flex-1">
-                    <p className="font-semibold">{c.user?.name}</p>
-                    <p>{c.message}</p>
+            <div className="space-y-6">
+              {commentsLoading ? (
+                <p className="text-center text-gray-500 text-lg py-12">
+                  جاري تحميل التعليقات...
+                </p>
+              ) : comments.length === 0 ? (
+                <p className="text-center text-gray-500 text-xl py-16">
+                  لا توجد تعليقات بعد، كن أول من يعلق!
+                </p>
+              ) : (
+                comments.map((c: any) => (
+                  <div
+                    key={c._id}
+                    className="flex gap-6 bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-2xl shadow-md"
+                  >
+                    <Avatar className="h-14 w-14 border-4 border-white shadow-lg">
+                      <AvatarFallback className="text-xl font-bold bg-indigo-600 text-white">
+                        {(c.user?.name || "U")[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-3">
+                        <p className="font-bold text-xl text-indigo-800">
+                          {c.user?.name || currentUser?.name || "مستخدم"}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {new Date(c.createdAt).toLocaleString("ar-EG")}
+                        </p>
+                      </div>
+                      <p className="text-lg text-gray-800 leading-relaxed bg-white p-5 rounded-xl shadow-inner">
+                        {c.message}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

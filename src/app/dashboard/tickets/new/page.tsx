@@ -15,18 +15,19 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDepartments } from "@/hooks/useDepartments";
+
 export default function NewTicketPage() {
   const router = useRouter();
   const createTicket = useCreateTicket();
-  const [files, setFiles] = useState<FileList | null>(null);
   const uploadFile = useUploadFile();
+  const [files, setFiles] = useState<FileList | null>(null);
   const { data: departments = [], isLoading: departmentsLoading } =
     useDepartments();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -37,14 +38,12 @@ export default function NewTicketPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // التحقق من الحقول
     if (!formData.title.trim()) return toast.error("العنوان مطلوب");
     if (!formData.description.trim()) return toast.error("الوصف مطلوب");
     if (!formData.departmentId) return toast.error("اختيار القسم مطلوب");
 
     let attachments: string[] = [];
 
-    // رفع الملفات إن وجدت
     if (files && files.length > 0) {
       toast.loading("جاري رفع الملفات...", { id: "upload" });
 
@@ -69,7 +68,7 @@ export default function NewTicketPage() {
         description: formData.description.trim(),
         departmentId: formData.departmentId,
         priority: formData.priority,
-        attachments, // أضف ده
+        attachments,
       },
       {
         onSuccess: () => {
@@ -81,38 +80,37 @@ export default function NewTicketPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 pt-24">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900">إنشاء تذكرة جديدة</h1>
-        <p className="text-lg text-gray-600 mt-2">
-          املأ النموذج أدناه لإرسال طلب دعم جديد
+    <div className="max-w-5xl mx-auto space-y-12 p-6 pt-24">
+      <div className="text-center">
+        <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          إنشاء تذكرة جديدة
+        </h1>
+        <p className="text-xl text-gray-600">
+          املأ النموذج لإرسال طلب دعم جديد
         </p>
       </div>
 
-      <Card className="shadow-xl">
-        <CardContent className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* العنوان */}
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-lg font-semibold">
+      <Card className="shadow-2xl bg-white/90 backdrop-blur-sm">
+        <CardContent className="p-10">
+          <form onSubmit={handleSubmit} className="space-y-10">
+            <div className="space-y-3">
+              <Label className="text-xl font-semibold">
                 العنوان <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="title"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="وصف مختصر للمشكلة"
-                className="text-lg"
+                className="h-14 text-xl"
                 required
               />
             </div>
 
-            {/* القسم والأولوية */}
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-2">
-                <Label htmlFor="department" className="text-lg font-semibold">
+            <div className="grid md:grid-cols-2 gap-10">
+              <div className="space-y-3">
+                <Label className="text-xl font-semibold">
                   القسم <span className="text-red-500">*</span>
                 </Label>
                 <Select
@@ -121,21 +119,32 @@ export default function NewTicketPage() {
                     setFormData({ ...formData, departmentId: v })
                   }
                 >
-                  <SelectTrigger id="department">
-                    <SelectValue placeholder="اختر القسم" />
+                  <SelectTrigger className="h-14 text-xl bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-xl shadow-md hover:shadow-xl hover:border-indigo-500 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-200 transition-all duration-300">
+                    <SelectValue
+                      placeholder={
+                        departmentsLoading ? "جاري تحميل..." : "اختر القسم"
+                      }
+                    />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-2 border-indigo-200 shadow-2xl rounded-xl">
                     {departmentsLoading ? (
                       <SelectItem value="loading" disabled>
                         جاري تحميل الأقسام...
                       </SelectItem>
                     ) : departments.length === 0 ? (
                       <SelectItem value="empty" disabled>
-                        لا توجد أقسام (يجب على الـ Admin إضافة أقسام)
+                        لا توجد أقسام
                       </SelectItem>
                     ) : (
                       departments.map((dept) => (
-                        <SelectItem key={dept._id} value={dept._id}>
+                        <SelectItem
+                          key={dept._id}
+                          value={dept._id}
+                          className="py-4 hover:bg-indigo-100 transition-colors"
+                        >
+                          <span className="mr-3 text-indigo-600 opacity-0 select-item-check text-xl">
+                            ✓
+                          </span>
                           {dept.name}
                         </SelectItem>
                       ))
@@ -144,8 +153,8 @@ export default function NewTicketPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="priority" className="text-lg font-semibold">
+              <div className="space-y-3">
+                <Label className="text-xl font-semibold">
                   الأولوية <span className="text-red-500">*</span>
                 </Label>
                 <Select
@@ -154,57 +163,80 @@ export default function NewTicketPage() {
                     setFormData({ ...formData, priority: v })
                   }
                 >
-                  <SelectTrigger id="priority">
+                  <SelectTrigger className="h-14 text-xl bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-xl shadow-md hover:shadow-xl hover:border-indigo-500 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-200 transition-all duration-300">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">منخفضة</SelectItem>
-                    <SelectItem value="medium">متوسطة</SelectItem>
-                    <SelectItem value="high">عالية</SelectItem>
+                  <SelectContent className="bg-white border-2 border-indigo-200 shadow-2xl rounded-xl">
+                    <SelectItem
+                      value="low"
+                      className="py-4 hover:bg-indigo-100"
+                    >
+                      <span className="mr-3 text-indigo-600 opacity-0 select-item-check text-xl">
+                        ✓
+                      </span>
+                      منخفضة
+                    </SelectItem>
+                    <SelectItem
+                      value="medium"
+                      className="py-4 hover:bg-indigo-100"
+                    >
+                      <span className="mr-3 text-indigo-600 opacity-0 select-item-check text-xl">
+                        ✓
+                      </span>
+                      متوسطة
+                    </SelectItem>
+                    <SelectItem
+                      value="high"
+                      className="py-4 hover:bg-indigo-100"
+                    >
+                      <span className="mr-3 text-indigo-600 opacity-0 select-item-check text-xl">
+                        ✓
+                      </span>
+                      عالية
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* الوصف */}
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-lg font-semibold">
+            <div className="space-y-3">
+              <Label className="text-xl font-semibold">
                 الوصف التفصيلي <span className="text-red-500">*</span>
               </Label>
               <Textarea
-                id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="اشرح المشكلة بالتفصيل... كلما كان الوصف أوضح، كلما تم الحل أسرع"
-                rows={8}
+                placeholder="اشرح المشكلة بالتفصيل..."
+                rows={10}
                 className="text-lg"
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label>مرفقات (اختياري)</Label>
+
+            <div className="space-y-3">
+              <Label className="text-xl font-semibold">مرفقات (اختياري)</Label>
               <Input
                 type="file"
                 multiple
                 onChange={(e) => setFiles(e.target.files)}
-                className="cursor-pointer"
+                className="cursor-pointer h-14 text-lg"
               />
               {files && files.length > 0 && (
-                <p className="text-sm text-green-600">
+                <p className="text-lg text-green-600 font-medium">
                   تم اختيار {files.length} ملف
                 </p>
               )}
             </div>
 
-            {/* الأزرار */}
-            <div className="flex justify-end gap-4 pt-6">
+            <div className="flex justify-end gap-6 pt-8">
               <Button
                 type="button"
                 variant="outline"
                 size="lg"
                 onClick={() => router.push("/dashboard/tickets")}
+                className="px-12 text-lg"
               >
                 إلغاء
               </Button>
@@ -212,11 +244,11 @@ export default function NewTicketPage() {
                 type="submit"
                 size="lg"
                 disabled={createTicket.isPending}
-                className="min-w-40"
+                className="px-16 text-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
               >
                 {createTicket.isPending ? (
                   <>
-                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="ml-3 h-6 w-6 animate-spin" />
                     جاري الإرسال...
                   </>
                 ) : (

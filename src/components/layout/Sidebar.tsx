@@ -1,3 +1,4 @@
+// Sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -37,25 +38,28 @@ export default function Sidebar({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-64 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out
+        className={`fixed inset-y-0 right-0 z-50 w-80 bg-gradient-to-b from-indigo-700 to-purple-800 shadow-2xl transform transition-transform duration-500 ease-in-out
         ${isOpen ? "translate-x-0" : "translate-x-full"}
       `}
       >
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold text-blue-600">Smart Desk</h2>
-          <button onClick={() => setIsOpen(false)}>
-            <X className="h-6 w-6" />
+        <div className="flex items-center justify-between p-8 border-b border-white/20">
+          <h2 className="text-3xl font-bold text-white">Smart Desk</h2>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-all"
+          >
+            <X className="h-7 w-7 text-white" />
           </button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-6 space-y-4">
           {navItems.map((item) => {
             if (item.adminOnly && user?.role !== "admin") return null;
 
@@ -66,25 +70,26 @@ export default function Sidebar({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  isActive
-                    ? "bg-blue-50 text-blue-600 font-medium shadow-sm"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`flex items-center gap-5 px-6 py-5 rounded-2xl transition-all duration-300 text-lg font-medium
+                  ${
+                    isActive
+                      ? "bg-white/20 text-white shadow-xl backdrop-blur-sm"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                  }`}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className="w-7 h-7" />
                 <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t">
+        <div className="absolute bottom-0 w-full p-6 border-t border-white/20">
           <button
             onClick={logout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 w-full transition-colors"
+            className="flex items-center gap-5 px-6 py-5 rounded-2xl bg-red-600/80 hover:bg-red-600 text-white w-full transition-all duration-300 text-lg font-medium shadow-xl"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-7 h-7" />
             <span>تسجيل الخروج</span>
           </button>
         </div>

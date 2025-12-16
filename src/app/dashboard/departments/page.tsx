@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -42,7 +41,6 @@ export default function DepartmentsPage() {
     description: "",
   });
 
-  // جلب الأقسام
   const { data: departments = [], isLoading } = useQuery<Department[]>({
     queryKey: ["departments"],
     queryFn: async () => {
@@ -51,7 +49,6 @@ export default function DepartmentsPage() {
     },
   });
 
-  // إضافة قسم
   const addDepartment = useMutation({
     mutationFn: async (data: { name: string; description?: string }) => {
       const res = await api.post("/departments/", data);
@@ -63,10 +60,8 @@ export default function DepartmentsPage() {
       setOpenAdd(false);
       setFormData({ name: "", description: "" });
     },
-    onError: () => toast.error("فشل إضافة القسم"),
   });
 
-  // تعديل قسم
   const updateDepartment = useMutation({
     mutationFn: async ({
       id,
@@ -85,10 +80,8 @@ export default function DepartmentsPage() {
       setEditingDept(null);
       setFormData({ name: "", description: "" });
     },
-    onError: () => toast.error("فشل تعديل القسم"),
   });
 
-  // حذف قسم
   const deleteDepartment = useMutation({
     mutationFn: async (id: string) => {
       await api.delete(`/departments/${id}`);
@@ -97,7 +90,6 @@ export default function DepartmentsPage() {
       queryClient.invalidateQueries({ queryKey: ["departments"] });
       toast.success("تم حذف القسم بنجاح");
     },
-    onError: () => toast.error("فشل حذف القسم"),
   });
 
   const handleAdd = (e: React.FormEvent) => {
@@ -122,51 +114,64 @@ export default function DepartmentsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 p-6 pt-24">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold">إدارة الأقسام</h1>
-        {user?.role === "admin" && (
+    <div className="max-w-6xl mx-auto space-y-12 p-6 pt-24">
+      <div className="text-center">
+        <h1 className="text-5xl font-bold text-gray-900 mb-4">إدارة الأقسام</h1>
+        <p className="text-xl text-gray-600">
+          أضف، عدّل، أو احذف الأقسام في النظام
+        </p>
+      </div>
+
+      {user?.role === "admin" && (
+        <div className="text-center">
           <Dialog open={openAdd} onOpenChange={setOpenAdd}>
             <DialogTrigger asChild>
-              <Button size="lg">
-                <Plus className="ml-2 h-5 w-5" />
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+              >
+                <Plus className="ml-2 h-6 w-6" />
                 إضافة قسم جديد
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-lg bg-white/95 backdrop-blur-sm">
               <DialogHeader>
-                <DialogTitle>إضافة قسم جديد</DialogTitle>
+                <DialogTitle className="text-2xl">إضافة قسم جديد</DialogTitle>
                 <DialogDescription>
                   املأ النموذج لإضافة قسم جديد إلى النظام
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleAdd} className="space-y-4">
+              <form onSubmit={handleAdd} className="space-y-6">
                 <div className="space-y-2">
-                  <Label>اسم القسم</Label>
+                  <Label className="text-base font-medium">اسم القسم</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder="مثال: تكنولوجيا المعلومات"
+                    className="h-12 text-base"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>الوصف (اختياري)</Label>
+                  <Label className="text-base font-medium">
+                    الوصف (اختياري)
+                  </Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
                     placeholder="وصف مختصر للقسم"
-                    rows={3}
+                    rows={4}
+                    className="text-base"
                   />
                 </div>
                 <div className="flex justify-end gap-3">
@@ -178,59 +183,72 @@ export default function DepartmentsPage() {
                     إلغاء
                   </Button>
                   <Button type="submit" disabled={addDepartment.isPending}>
-                    {addDepartment.isPending ? "جاري..." : "إضافة"}
+                    {addDepartment.isPending ? "جاري..." : "إضافة القسم"}
                   </Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {departments.length === 0 ? (
-          <Card className="col-span-full text-center py-12">
+          <Card className="col-span-full text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100">
             <CardContent>
-              <p className="text-xl text-gray-500">لا توجد أقسام بعد</p>
+              <p className="text-2xl text-gray-500 font-medium">
+                لا توجد أقسام بعد
+              </p>
               {user?.role === "admin" && (
-                <p className="text-gray-400 mt-2">ابدأ بإضافة قسم جديد</p>
+                <p className="text-gray-400 mt-4 text-lg">
+                  ابدأ بإضافة قسم جديد من الأعلى
+                </p>
               )}
             </CardContent>
           </Card>
         ) : (
           departments.map((dept) => (
-            <Card key={dept._id} className="relative">
-              <CardHeader>
-                <CardTitle className="text-xl">{dept.name}</CardTitle>
+            <Card
+              key={dept._id}
+              className="hover:shadow-2xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm"
+            >
+              <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-t-xl">
+                <CardTitle className="text-2xl text-indigo-800">
+                  {dept.name}
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {dept.description ? (
-                  <p className="text-gray-600">{dept.description}</p>
+                  <p className="text-gray-700 leading-relaxed">
+                    {dept.description}
+                  </p>
                 ) : (
                   <p className="text-gray-400 italic">لا يوجد وصف</p>
                 )}
-                <p className="text-sm text-gray-500 mt-4">
+                <p className="text-sm text-gray-500 mt-6">
                   تم الإنشاء في:{" "}
                   {new Date(dept.createdAt).toLocaleDateString("ar-EG")}
                 </p>
 
                 {user?.role === "admin" && (
-                  <div className="flex gap-2 mt-6">
+                  <div className="flex gap-3 mt-8 ">
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="destructive"
+                      className="flex-1 "
                       onClick={() => startEdit(dept)}
                     >
-                      <Edit className="h-4 w-4 ml-1" />
+                      <Edit className="h-4 w-4 ml-2 " />
                       تعديل
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
+                      className="flex-1 "
                       onClick={() => deleteDepartment.mutate(dept._id)}
                       disabled={deleteDepartment.isPending}
                     >
-                      <Trash2 className="h-4 w-4 ml-1" />
+                      <Trash2 className="h-4 w-4 ml-2" />
                       حذف
                     </Button>
                   </div>
@@ -243,30 +261,32 @@ export default function DepartmentsPage() {
 
       {/* Dialog التعديل */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg bg-white/95 backdrop-blur-sm">
           <DialogHeader>
-            <DialogTitle>تعديل القسم</DialogTitle>
+            <DialogTitle className="text-2xl">تعديل القسم</DialogTitle>
             <DialogDescription>قم بتعديل بيانات القسم</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleEdit} className="space-y-4">
+          <form onSubmit={handleEdit} className="space-y-6">
             <div className="space-y-2">
-              <Label>اسم القسم</Label>
+              <Label className="text-base font-medium">اسم القسم</Label>
               <Input
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
+                className="h-12 text-base"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label>الوصف (اختياري)</Label>
+              <Label className="text-base font-medium">الوصف (اختياري)</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                rows={3}
+                rows={4}
+                className="text-base"
               />
             </div>
             <div className="flex justify-end gap-3">
